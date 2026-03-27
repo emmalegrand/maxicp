@@ -7,6 +7,8 @@
 package org.maxicp.search;
 
 import org.maxicp.cp.CPFactory;
+import org.maxicp.cp.engine.constraints.scheduling.NoOverlapPrecedenceGraph;
+import org.maxicp.cp.engine.core.CPConstraint;
 import org.maxicp.cp.engine.core.CPIntervalVar;
 import org.maxicp.cp.engine.core.CPSolver;
 import org.maxicp.state.StateInt;
@@ -14,6 +16,7 @@ import org.maxicp.state.datastructures.StateSparseSet;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.function.Supplier;
 
 /**
@@ -22,13 +25,13 @@ import java.util.function.Supplier;
  */
 public class Rank {
 
-    public static Supplier<Runnable[]> rank(CPIntervalVar[][] intervals) {
-        Rank rank = new Rank(intervals);
+    public static Supplier<Runnable[]> rank(CPIntervalVar[][] intervals, CPConstraint[] c, NoOverlapPrecedenceGraph precedenceGraph, HashMap<CPIntervalVar, Integer> mapping) {
+        Rank rank = new Rank(intervals, c, precedenceGraph, mapping);
         return rank::alternatives_;
     }
 
-    public static Supplier<Runnable[]> rank(CPIntervalVar[] intervals) {
-        Ranker ranker = new Ranker(intervals);
+    public static Supplier<Runnable[]> rank(CPIntervalVar[] intervals, CPConstraint[] c, NoOverlapPrecedenceGraph precedenceGraph, HashMap<CPIntervalVar, Integer> mapping) {
+        Ranker ranker = new Ranker(intervals, c, precedenceGraph, mapping);
         return ranker::alternatives;
     }
 
@@ -36,16 +39,20 @@ public class Rank {
     Ranker[] rankers;
     StateSparseSet notRanked;
     StateInt currentRanker;
+    CPConstraint[] constraints;
+    NoOverlapPrecedenceGraph precedenceGraph;
 
-    public Rank(CPIntervalVar[][] intervals) {
+    public Rank(CPIntervalVar[][] intervals, CPConstraint[] constraints, NoOverlapPrecedenceGraph precedenceGraph, HashMap<CPIntervalVar, Integer> mapping) {
         this.intervals = intervals;
         this.rankers = new Ranker[intervals.length];
         CPSolver cp = intervals[0][0].getSolver();
         this.notRanked = new StateSparseSet(cp.getStateManager(), intervals.length, 0);
         this.currentRanker = cp.getStateManager().makeStateInt(-1);
         for (int i = 0; i < intervals.length; i++) {
-            rankers[i] = new Ranker(intervals[i]);
+            rankers[i] = new Ranker(intervals[i], constraints, precedenceGraph, mapping);
         }
+        this.constraints = constraints;
+        this.precedenceGraph = precedenceGraph;
     }
 
 
@@ -114,12 +121,18 @@ public class Rank {
         private final CPSolver cp;
         private final int[] notRankedIterator;
         private final StateSparseSet notRanked;
+        private CPConstraint[] constraints;
+        private NoOverlapPrecedenceGraph precedenceGraph;
+        private HashMap<CPIntervalVar, Integer> mapping;
 
-        Ranker(CPIntervalVar[] intervals) {
+        Ranker(CPIntervalVar[] intervals, CPConstraint[] constraints, NoOverlapPrecedenceGraph precedenceGraph, HashMap<CPIntervalVar, Integer> mapping) {
             this.intervals = intervals;
             this.cp = intervals[0].getSolver();
             this.notRanked = new StateSparseSet(cp.getStateManager(), intervals.length, 0);
             this.notRankedIterator = new int[intervals.length];
+            this.constraints = constraints;
+            this.precedenceGraph = precedenceGraph;
+            this.mapping = mapping;
         }
 
         int slack() {
@@ -164,6 +177,9 @@ public class Rank {
                         if (i_ != j) {
                             int otherTaskId = notRankedIterator[j];
                             cp.post(CPFactory.endBeforeStart(intervals[taskId], intervals[otherTaskId]));
+//                            precedenceGraph.addPrecedence(mapping.get(intervals[taskId]), mapping.get(intervals[otherTaskId]));
+//                            precedenceGraph.propageOnPrecedence(constraints);
+//                            cp.fixPoint();
                         }
                     }
                 });

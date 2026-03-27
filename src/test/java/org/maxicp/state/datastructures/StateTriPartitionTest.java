@@ -334,7 +334,7 @@ public class StateTriPartitionTest extends StateManagerTest {
     /**
      * assert the state of a StateSequenceSet
      * train1 the methods {@link StateTriPartition#nPossible()}, {@link StateTriPartition#nIncluded()}, {@link StateTriPartition#nExcluded()}
-     * {@link StateTriPartition#fillPossible(int[])}, {@link StateTriPartition#fillIncluded(int[])}, {@link StateTriPartition#fillExcluded(int[])},
+     * {@link StateTriPartition#fillPossible(int[])}, {@link StateTriPartition#fillIncluded(Integer[])}, {@link StateTriPartition#fillExcluded(int[])},
      * {@link StateTriPartition#contains(int)}, {@link StateTriPartition#size()}
      * @param set set that will be tested
      * @param sortedIncluded required values, sorted

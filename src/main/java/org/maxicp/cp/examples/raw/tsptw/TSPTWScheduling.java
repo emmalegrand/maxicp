@@ -13,8 +13,6 @@ import org.maxicp.cp.engine.core.*;
 import org.maxicp.cp.examples.utils.TSPTWInstance;
 import org.maxicp.modeling.IntVar;
 import org.maxicp.search.*;
-import org.maxicp.util.algo.DistanceMatrix;
-import org.maxicp.util.io.InputReader;
 
 import java.util.ArrayList;
 import java.util.Arrays;

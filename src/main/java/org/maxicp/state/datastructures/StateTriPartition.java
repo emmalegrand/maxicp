@@ -406,7 +406,7 @@ public class StateTriPartition {
         }
         if (nExcluded() > 0)
             b.append(elems[idx++] + ofs);
-        b.append('}');
+        b.append("}\n");
         return b.toString();
     }
 
