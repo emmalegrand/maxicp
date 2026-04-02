@@ -43,7 +43,7 @@ public class JobShop {
     }
 
     public static void main(String[] args) {
-        JobShopInstance instance = new JobShopInstance("data/JOBSHOP/ft10.txt");
+        JobShopInstance instance = new JobShopInstance("data/JOBSHOP/la28.txt");
 
         int nJobs = instance.nJobs;
         int nMachines = instance.nMachines;
@@ -79,12 +79,12 @@ public class JobShop {
         for (int j = 0; j < nJobs; j++) {
             for (int m = 1; m < nMachines; m++) {
                 cp.post(endBeforeStart(activities[j][m - 1], activities[j][m]));
-//                precedenceGraph.addPrecedence(j*nMachines + (m-1), j*nMachines+m);
+                precedenceGraph.addPrecedence(j*nMachines + (m-1), j*nMachines+m);
             }
         }
 
 
-//        cp.post(precedenceGraph);
+        cp.post(precedenceGraph);
 
 
         CPIntervalVar [][] toRank = new CPIntervalVar[nMachines][];
@@ -101,9 +101,9 @@ public class JobShop {
             }
             CPIntervalVar [] onMachine = machineActivities.toArray(new CPIntervalVar[0]);
             cp.post(noOverlap(onMachine));
-//            MinMakespan minMakespan = new MinMakespan(precedenceGraph, makespan, onMachine);
-//            constraints[m] = minMakespan;
-//            cp.post(minMakespan);
+            MinMakespan minMakespan = new MinMakespan(precedenceGraph, makespan, onMachine);
+            constraints[m] = minMakespan;
+            cp.post(minMakespan);
             toRank[m] = onMachine;
         }
 

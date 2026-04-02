@@ -177,9 +177,10 @@ public class Rank {
                         if (i_ != j) {
                             int otherTaskId = notRankedIterator[j];
                             cp.post(CPFactory.endBeforeStart(intervals[taskId], intervals[otherTaskId]));
-//                            precedenceGraph.addPrecedence(mapping.get(intervals[taskId]), mapping.get(intervals[otherTaskId]));
-//                            precedenceGraph.propageOnPrecedence(constraints);
-//                            cp.fixPoint();
+                            precedenceGraph.addPrecedence(mapping.get(intervals[taskId]), mapping.get(intervals[otherTaskId]));
+                            precedenceGraph.propagate();
+                            precedenceGraph.propageOnPrecedence(constraints);
+                            cp.fixPoint();
                         }
                     }
                 });
